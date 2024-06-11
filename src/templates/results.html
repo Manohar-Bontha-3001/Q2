@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Earthquake Results</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Earthquake Results</h1>
+    <table>
+        <tr>
+            <th>Time</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Depth</th>
+            <th>Magnitude</th>
+            <th>Place</th>
+        </tr>
+        {% for earthquake in earthquakes %}
+        <tr>
+            <td>{{ earthquake.time }}</td>
+            <td>{{ earthquake.latitude }}</td>
+            <td>{{ earthquake.longitude }}</td>
+            <td>{{ earthquake.depth }}</td>
+            <td>{{ earthquake.mag }}</td>
+            <td>{{ earthquake.place }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>

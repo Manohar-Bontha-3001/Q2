@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Query Earthquake Data</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Query Earthquake Data</h1>
+    <form action="{{ url_for('query_data') }}" method="post">
+        <label for="mag">Magnitude greater than:</label>
+        <input type="text" id="mag" name="mag"><br>
+
+        <label for="date_range">Date range (YYYY-MM-DD - YYYY-MM-DD):</label>
+        <input type="text" id="date_range" name="date_range"><br>
+
+        <label for="latitude">Latitude:</label>
+        <input type="text" id="latitude" name="latitude"><br>
+
+        <label for="longitude">Longitude:</label>
+        <input type="text" id="longitude" name="longitude"><br>
+
+        <label for="distance">Distance (km):</label>
+        <input type="text" id="distance" name="distance"><br>
+
+        <input type="submit" value="Query">
+    </form>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Earthquake Data</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Earthquake Data Operations</h1>
+    <ul>
+        <li><a href="{{ url_for('query_data') }}">Query Earthquake Data</a></li>
+        <li><a href="{{ url_for('count_large_earthquakes') }}">Count Earthquakes with Magnitude > 5.0</a></li>
+        <li><a href="{{ url_for('large_earthquakes_night') }}">Count Large Earthquakes at Night</a></li>
+    </ul>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>
