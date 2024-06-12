@@ -24,6 +24,9 @@ def upload_file():
     file = request.files['file']
     if file:
         data = pd.read_csv(file)
+        # Replace NaN values with None
+        data = data.where(pd.notnull(data), None)
+        
         with engine.connect() as connection:
             for index, row in data.iterrows():
                 connection.execute(text('''
