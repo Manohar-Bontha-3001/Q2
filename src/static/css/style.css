@@ -5,45 +5,105 @@ body {
     padding: 0;
 }
 
-h1 {
+header {
     background-color: #4CAF50;
     color: white;
     padding: 20px;
     text-align: center;
+    margin-bottom: 20px;
+    border-radius: 8px;
 }
 
-form {
-    margin: 20px;
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+header p {
+    margin: 5px 0;
+}
+
+.container {
+    padding: 20px;
+}
+
+h1 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+.card {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-title {
+    font-size: 1.25em;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
 }
 
 label {
     display: block;
     margin-top: 10px;
+    font-weight: bold;
 }
 
-input[type="text"], input[type="submit"], .form-control {
+input[type="text"], input[type="file"], .form-control {
     padding: 10px;
     margin-top: 5px;
     display: block;
     width: 100%;
     box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-input[type="submit"] {
+input[type="submit"], .btn-primary {
     background-color: #4CAF50;
     color: white;
     border: none;
     cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 1em;
 }
 
-input[type="submit"]:hover {
+input[type="submit"]:hover, .btn-primary:hover {
     background-color: #45a049;
 }
 
 .table {
     margin: 20px 0;
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.card {
-    margin-bottom: 20px;
+.table th, .table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.table th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table tr:hover {
+    background-color: #ddd;
 }

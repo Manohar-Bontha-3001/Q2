@@ -1,40 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Query Earthquake Data</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1 class="text-center my-4">Query Earthquake Data</h1>
-        <form action="{{ url_for('query_data') }}" method="post">
-            <div class="form-group">
-                <label for="mag">Magnitude greater than:</label>
-                <input type="text" id="mag" name="mag" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="date_range">Date range (YYYY-MM-DD - YYYY-MM-DD):</label>
-                <input type="text" id="date_range" name="date_range" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="latitude">Latitude:</label>
-                <input type="text" id="latitude" name="latitude" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="longitude">Longitude:</label>
-                <input type="text" id="longitude" name="longitude" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="distance">Distance (km):</label>
-                <input type="text" id="distance" name="distance" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-primary">Query</button>
-        </form>
-    </div>
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center my-4">Query Earthquake Data</h1>
+    <form action="/query" method="post">
+        <div class="form-group">
+            <label for="mag">Magnitude Greater Than:</label>
+            <input type="text" class="form-control" id="mag" name="mag">
+        </div>
+        <div class="form-group">
+            <label for="date_range">Date Range:</label>
+            <input type="text" class="form-control" id="date_range" name="date_range" placeholder="YYYY-MM-DD - YYYY-MM-DD">
+        </div>
+        <div class="form-group">
+            <label for="latitude">Latitude:</label>
+            <input type="text" class="form-control" id="latitude" name="latitude">
+        </div>
+        <div class="form-group">
+            <label for="longitude">Longitude:</label>
+            <input type="text" class="form-control" id="longitude" name="longitude">
+        </div>
+        <div class="form-group">
+            <label for="distance">Distance (km):</label>
+            <input type="text" class="form-control" id="distance" name="distance">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock %}

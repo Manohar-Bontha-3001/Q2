@@ -1,46 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Earthquake Data Operations</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1 class="text-center my-4">Earthquake Data Operations</h1>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Query Earthquake Data</h5>
-                        <p class="card-text">Search and filter earthquake data.</p>
-                        <a href="{{ url_for('query_data') }}" class="btn btn-primary">Query Data</a>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Upload CSV File</h5>
+                <form action="/upload" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" class="form-control-file" name="file">
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Count Earthquakes with Magnitude > 5.0</h5>
-                        <p class="card-text">Get the count of significant earthquakes.</p>
-                        <a href="{{ url_for('count_large_earthquakes') }}" class="btn btn-primary">Count Earthquakes</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Count Large Earthquakes at Night</h5>
-                        <p class="card-text">Find out how many large earthquakes occurred at night.</p>
-                        <a href="{{ url_for('large_earthquakes_night') }}" class="btn btn-primary">Count Night Earthquakes</a>
-                    </div>
-                </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
             </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Query Earthquake Data</h5>
+                <a href="/query" class="btn btn-primary">Query Data</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Count Large Earthquakes</h5>
+                <a href="/count" class="btn btn-primary">Count Earthquakes</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
