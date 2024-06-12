@@ -28,7 +28,6 @@ def clean_data(file):
     })
 
     # Adjust negative latitude and longitude if necessary
-    # Assuming you want to take the absolute value of these fields
     data['latitude'] = data['latitude'].abs()
     data['longitude'] = data['longitude'].abs()
 
