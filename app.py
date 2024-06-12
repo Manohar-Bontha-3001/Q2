@@ -1,35 +1,41 @@
+import pandas as pd
+import pymysql
 from flask import Flask, request, render_template, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
-import pyodbc
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mssql+pyodbc://<username>:<password>@<server>/<database>?driver=ODBC+Driver+17+for+SQL+Server'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'your_secret_key'
 
-db = SQLAlchemy(app)
-
-class Earthquake(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.String(50))
-    latitude = db.Column(db.Float)
-    longitude = db.Column(db.Float)
-    depth = db.Column(db.Float)
-    mag = db.Column(db.Float)
-    magType = db.Column(db.String(10))
-    nst = db.Column(db.Integer)
-    gap = db.Column(db.Float)
-    dmin = db.Column(db.Float)
-    rms = db.Column(db.Float)
-    net = db.Column(db.String(10))
-    id_earthquake = db.Column(db.String(20))
-    updated = db.Column(db.String(50))
-    place = db.Column(db.String(100))
-    type = db.Column(db.String(50))
+# Database connection
+conn = pymysql.connect(
+    host='your-server-name.database.windows.net',
+    user='your-username',
+    password='your-password',
+    db='your-database-name',
+    cursorclass=pymysql.cursors.DictCursor
+)
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    file = request.files['file']
+    if file:
+        data = pd.read_csv(file)
+        cursor = conn.cursor()
+        for index, row in data.iterrows():
+            cursor.execute('''
+                INSERT INTO Earthquake (
+                    time, latitude, longitude, depth, mag, magType, nst, gap, dmin, rms, net, id_earthquake, updated, place, type
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ''',
+            (row['time'], row['latitude'], row['longitude'], row['depth'], row['mag'], row['magType'],
+            row['nst'], row['gap'], row['dmin'], row['rms'], row['net'], row['id'],
+            row['updated'], row['place'], row['type']))
+        conn.commit()
+        return redirect(url_for('index'))
+    return 'No file uploaded', 400
 
 @app.route('/query', methods=['GET', 'POST'])
 def query_data():
@@ -40,35 +46,53 @@ def query_data():
         lon = request.form.get('longitude')
         distance = request.form.get('distance')
 
+        cursor = conn.cursor()
+
         if mag:
-            earthquakes = Earthquake.query.filter(Earthquake.mag >= float(mag)).all()
+            cursor.execute('SELECT * FROM Earthquake WHERE mag >= %s', (mag,))
+            earthquakes = cursor.fetchall()
             return render_template('results.html', earthquakes=earthquakes)
 
         if date_range:
             start_date, end_date = date_range.split(' - ')
-            earthquakes = Earthquake.query.filter(Earthquake.time >= start_date, Earthquake.time <= end_date).all()
+            cursor.execute('SELECT * FROM Earthquake WHERE time BETWEEN %s AND %s', (start_date, end_date))
+            earthquakes = cursor.fetchall()
             return render_template('results.html', earthquakes=earthquakes)
 
         if lat and lon and distance:
             lat, lon, distance = float(lat), float(lon), float(distance)
-            earthquakes = Earthquake.query.filter(
-                func.sqrt(func.pow(Earthquake.latitude - lat, 2) + func.pow(Earthquake.longitude - lon, 2)) <= distance
-            ).all()
+            cursor.execute('''
+                SELECT *, 
+                (111.045 * DEGREES(ACOS(COS(RADIANS(%s)) 
+                * COS(RADIANS(latitude)) 
+                * COS(RADIANS(%s) - RADIANS(longitude)) 
+                + SIN(RADIANS(%s)) 
+                * SIN(RADIANS(latitude))))) AS distance
+                FROM Earthquake
+                HAVING distance <= %s
+            ''', (lat, lon, lat, distance))
+            earthquakes = cursor.fetchall()
             return render_template('results.html', earthquakes=earthquakes)
-
-        # Additional queries can be handled here
 
     return render_template('query.html')
 
 @app.route('/count', methods=['GET'])
 def count_large_earthquakes():
-    count = Earthquake.query.filter(Earthquake.mag > 5.0).count()
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) AS count FROM Earthquake WHERE mag > 5.0')
+    count = cursor.fetchone()['count']
     return f'Total earthquakes with magnitude greater than 5.0: {count}'
 
 @app.route('/night', methods=['GET'])
 def large_earthquakes_night():
-    night_earthquakes = Earthquake.query.filter(Earthquake.mag > 4.0, func.hour(Earthquake.time).between(18, 6)).count()
-    return f'Total large earthquakes (>4.0 mag) at night: {night_earthquakes}'
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT COUNT(*) AS count FROM Earthquake 
+        WHERE mag > 4.0 
+        AND (TIME(time) >= '18:00:00' OR TIME(time) <= '06:00:00')
+    ''')
+    count = cursor.fetchone()['count']
+    return f'Total large earthquakes (>4.0 mag) at night: {count}'
 
 if __name__ == '__main__':
     app.run(debug=True)
