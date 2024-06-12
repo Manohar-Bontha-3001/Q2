@@ -1,17 +1,29 @@
+import os
 import pandas as pd
 import pymysql
 from flask import Flask, request, render_template, redirect, url_for
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = os.urandom(24)  # Generates a random secret key
+
+# Connection details
+host = 'manoharb.database.windows.net'
+port = 1433
+user = 'manoharb'
+password = 'Arjunsuha1*'
+db = 'manoharbontha'
 
 # Database connection
 conn = pymysql.connect(
-    host='your-server-name.database.windows.net',
-    user='your-username',
-    password='your-password',
-    db='your-database-name',
-    cursorclass=pymysql.cursors.DictCursor
+    host=host,
+    port=port,
+    user=user,
+    password=password,
+    db=db,
+    cursorclass=pymysql.cursors.DictCursor,
+    connect_timeout=30,  # Increase the timeout value
+    read_timeout=30,  # Increase the read timeout value
+    write_timeout=30  # Increase the write timeout value
 )
 
 @app.route('/')
