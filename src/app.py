@@ -30,7 +30,23 @@ def upload_file():
                     INSERT INTO Earthquake (
                         time, latitude, longitude, depth, mag, magType, nst, gap, dmin, rms, net, id_earthquake, updated, place, type
                     ) VALUES (:time, :latitude, :longitude, :depth, :mag, :magType, :nst, :gap, :dmin, :rms, :net, :id_earthquake, :updated, :place, :type)
-                '''), **row.to_dict())
+                '''), {
+                    'time': row['time'],
+                    'latitude': row['latitude'],
+                    'longitude': row['longitude'],
+                    'depth': row['depth'],
+                    'mag': row['mag'],
+                    'magType': row['magType'],
+                    'nst': row['nst'],
+                    'gap': row['gap'],
+                    'dmin': row['dmin'],
+                    'rms': row['rms'],
+                    'net': row['net'],
+                    'id_earthquake': row['id'],
+                    'updated': row['updated'],
+                    'place': row['place'],
+                    'type': row['type']
+                })
         return redirect(url_for('index'))
     return 'No file uploaded', 400
 
@@ -75,7 +91,7 @@ def query_data():
 def count_large_earthquakes():
     with engine.connect() as connection:
         result = connection.execute(text('SELECT COUNT(*) AS count FROM Earthquake WHERE mag > 5.0'))
-        count = result.fetchone()['count']
+        count = result.fetchone()[0]  # Accessing the first column directly
     return f'Total earthquakes with magnitude greater than 5.0: {count}'
 
 @app.route('/night', methods=['GET'])
@@ -84,9 +100,9 @@ def large_earthquakes_night():
         result = connection.execute(text('''
             SELECT COUNT(*) AS count FROM Earthquake 
             WHERE mag > 4.0 
-            AND (TIME(time) >= '18:00:00' OR TIME(time) <= '06:00:00')
+            AND (CAST(time AS TIME) >= '18:00:00' OR CAST(time AS TIME) <= '06:00:00')
         '''))
-        count = result.fetchone()['count']
+        count = result.fetchone()[0]  # Accessing the first column directly
     return f'Total large earthquakes (>4.0 mag) at night: {count}'
 
 if __name__ == '__main__':
