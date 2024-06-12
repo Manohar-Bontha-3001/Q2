@@ -15,6 +15,29 @@ connection_string = (
 # Create SQLAlchemy engine
 engine = create_engine(connection_string)
 
+def clean_data(file):
+    # Load the CSV file
+    data = pd.read_csv(file)
+
+    # Handle missing data by filling with default values or dropping rows
+    data = data.fillna({
+        'nst': 0,      # Number of seismic stations
+        'gap': 0,      # Gap
+        'dmin': 0,     # Minimum distance to earthquake
+        'rms': 0,      # Root mean square
+    })
+
+    # Adjust negative latitude and longitude if necessary
+    # Assuming you want to take the absolute value of these fields
+    data['latitude'] = data['latitude'].abs()
+    data['longitude'] = data['longitude'].abs()
+
+    # Convert GMT time to local time if required (example converting to UTC-5)
+    data['time'] = pd.to_datetime(data['time'])
+    data['local_time'] = data['time'] - pd.Timedelta(hours=5)
+
+    return data
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -23,16 +46,14 @@ def index():
 def upload_file():
     file = request.files['file']
     if file:
-        data = pd.read_csv(file)
-        # Replace NaN values with None
-        data = data.where(pd.notnull(data), None)
-        
+        data = clean_data(file)
+
         with engine.connect() as connection:
             for index, row in data.iterrows():
                 connection.execute(text('''
                     INSERT INTO Earthquake (
-                        time, latitude, longitude, depth, mag, magType, nst, gap, dmin, rms, net, id_earthquake, updated, place, type
-                    ) VALUES (:time, :latitude, :longitude, :depth, :mag, :magType, :nst, :gap, :dmin, :rms, :net, :id_earthquake, :updated, :place, :type)
+                        time, latitude, longitude, depth, mag, magType, nst, gap, dmin, rms, net, id_earthquake, updated, place, type, local_time
+                    ) VALUES (:time, :latitude, :longitude, :depth, :mag, :magType, :nst, :gap, :dmin, :rms, :net, :id_earthquake, :updated, :place, :type, :local_time)
                 '''), {
                     'time': row['time'],
                     'latitude': row['latitude'],
@@ -48,7 +69,8 @@ def upload_file():
                     'id_earthquake': row['id'],
                     'updated': row['updated'],
                     'place': row['place'],
-                    'type': row['type']
+                    'type': row['type'],
+                    'local_time': row['local_time']
                 })
         return redirect(url_for('index'))
     return 'No file uploaded', 400
