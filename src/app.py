@@ -118,4 +118,4 @@ def large_earthquakes_night():
     return f'Total large earthquakes (>4.0 mag) at night: {count}'
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True) 
