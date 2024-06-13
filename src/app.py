@@ -28,7 +28,7 @@ def upload_file():
         with engine.connect() as connection:
             for index, row in data.iterrows():
                 connection.execute(text('''
-                    INSERT INTO Earthquake (
+                    INSERT INTO earthquakes (
                         time, latitude, longitude, depth, Magnitude, magType, nst, gap, dmin, rms, net, id_earthquake, updated, place, type, local_time
                     ) VALUES (:time, :latitude, :longitude, :depth, :Magnitude, :magType, :nst, :gap, :dmin, :rms, :net, :id_earthquake, :updated, :place, :type, :local_time)
                 '''), {
@@ -63,7 +63,7 @@ def query_data():
         lon = request.form.get('longitude')
         place = request.form.get('place')
 
-        query = 'SELECT * FROM Earthquake WHERE 1=1'
+        query = 'SELECT * FROM earthquakes WHERE 1=1'
         params = {}
 
         if min_mag and max_mag:
@@ -102,7 +102,7 @@ def query_data():
 @app.route('/count', methods=['GET'])
 def count_large_earthquakes():
     with engine.connect() as connection:
-        result = connection.execute(text('SELECT COUNT(*) AS count FROM Earthquake WHERE Magnitude > 5.0'))
+        result = connection.execute(text('SELECT COUNT(*) AS count FROM earthquakes WHERE Magnitude > 5.0'))
         count = result.fetchone()[0]  # Accessing the first column directly
     return f'Total earthquakes with magnitude greater than 5.0: {count}'
 
@@ -110,7 +110,7 @@ def count_large_earthquakes():
 def large_earthquakes_night():
     with engine.connect() as connection:
         result = connection.execute(text('''
-            SELECT COUNT(*) AS count FROM Earthquake 
+            SELECT COUNT(*) AS count FROM earthquakes 
             WHERE Magnitude > 4.0 
             AND (CAST(time AS TIME) >= '18:00:00' OR CAST(time AS TIME) <= '06:00:00')
         '''))
