@@ -3,14 +3,22 @@
 {% block content %}
 <div class="container">
     <h1 class="text-center my-4">Query Earthquake Data</h1>
-    <form action="/query" method="post">
+    <form action="{{ url_for('query_data') }}" method="post">
         <div class="form-group">
-            <label for="mag">Magnitude Greater Than:</label>
-            <input type="text" class="form-control" id="mag" name="mag">
+            <label for="min_mag">Minimum Magnitude:</label>
+            <input type="text" class="form-control" id="min_mag" name="min_mag">
         </div>
         <div class="form-group">
-            <label for="date_range">Date Range:</label>
-            <input type="text" class="form-control" id="date_range" name="date_range" placeholder="YYYY-MM-DD - YYYY-MM-DD">
+            <label for="max_mag">Maximum Magnitude:</label>
+            <input type="text" class="form-control" id="max_mag" name="max_mag">
+        </div>
+        <div class="form-group">
+            <label for="start_date">Start Date:</label>
+            <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Select Start Date">
+        </div>
+        <div class="form-group">
+            <label for="end_date">End Date:</label>
+            <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="Select End Date">
         </div>
         <div class="form-group">
             <label for="latitude">Latitude:</label>
@@ -21,10 +29,26 @@
             <input type="text" class="form-control" id="longitude" name="longitude">
         </div>
         <div class="form-group">
-            <label for="distance">Distance (km):</label>
-            <input type="text" class="form-control" id="distance" name="distance">
+            <label for="place">Place:</label>
+            <input type="text" class="form-control" id="place" name="place">
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>
+
+<!-- Include jQuery and jQuery UI libraries -->
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript">
+    $(function() {
+        $(".datepicker").datepicker({
+            dateFormat: "yy-mm-dd",
+            changeMonth: true,
+            changeYear: true,
+            showAnim: "slideDown"
+        });
+    });
+</script>
 {% endblock %}

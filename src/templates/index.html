@@ -6,9 +6,9 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Upload CSV File</h5>
-                <form action="/upload" method="post" enctype="multipart/form-data">
+                <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                        <input type="file" class="form-control-file" name="file">
+                        <input type="file" class="form-control-file" name="file" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Upload</button>
                 </form>
@@ -19,7 +19,7 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Query Earthquake Data</h5>
-                <a href="/query" class="btn btn-primary">Query Data</a>
+                <a href="{{ url_for('query_data') }}" class="btn btn-primary">Query Data</a>
             </div>
         </div>
     </div>
@@ -27,7 +27,7 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Count Large Earthquakes</h5>
-                <a href="/count" class="btn btn-primary">Count Earthquakes</a>
+                <a href="{{ url_for('count_large_earthquakes') }}" class="btn btn-primary">Count Earthquakes</a>
             </div>
         </div>
     </div>

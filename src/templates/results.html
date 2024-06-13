@@ -1,31 +1,43 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="container">
-    <h1 class="text-center my-4">Earthquake Results</h1>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Depth</th>
-                <th>Magnitude</th>
-                <th>Place</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for earthquake in earthquakes %}
-            <tr>
-                <td>{{ earthquake.time }}</td>
-                <td>{{ earthquake.latitude }}</td>
-                <td>{{ earthquake.longitude }}</td>
-                <td>{{ earthquake.depth }}</td>
-                <td>{{ earthquake.mag }}</td>
-                <td>{{ earthquake.place }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earthquake Results</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="my-4 text-center">
+            <h1>Earthquake Results</h1>
+            <p>Name: Manohar Bontha</p>
+            <p>ID Number: 1002091309</p>
+        </header>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Depth</th>
+                    <th>Magnitude</th>
+                    <th>Place</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for earthquake in earthquakes %}
+                    <tr>
+                        <td>{{ earthquake.DateTime }}</td>
+                        <td>{{ earthquake.Latitude }}</td>
+                        <td>{{ earthquake.Longitude }}</td>
+                        <td>{{ earthquake.Depth }}</td>
+                        <td>{{ earthquake.Magnitude }}</td>
+                        <td>{{ earthquake.Place }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

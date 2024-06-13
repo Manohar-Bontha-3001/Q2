@@ -15,28 +15,6 @@ connection_string = (
 # Create SQLAlchemy engine
 engine = create_engine(connection_string)
 
-def clean_data(file):
-    # Load the CSV file
-    data = pd.read_csv(file)
-
-    # Handle missing data by filling with default values or dropping rows
-    data = data.fillna({
-        'nst': 0,      # Number of seismic stations
-        'gap': 0,      # Gap
-        'dmin': 0,     # Minimum distance to earthquake
-        'rms': 0,      # Root mean square
-    })
-
-    # Adjust negative latitude and longitude if necessary
-    data['latitude'] = data['latitude'].abs()
-    data['longitude'] = data['longitude'].abs()
-
-    # Convert GMT time to local time if required (example converting to UTC-5)
-    data['time'] = pd.to_datetime(data['time'])
-    data['local_time'] = data['time'] - pd.Timedelta(hours=5)
-
-    return data
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -45,20 +23,20 @@ def index():
 def upload_file():
     file = request.files['file']
     if file:
-        data = clean_data(file)
+        data = pd.read_csv(file)
 
         with engine.connect() as connection:
             for index, row in data.iterrows():
                 connection.execute(text('''
                     INSERT INTO Earthquake (
-                        time, latitude, longitude, depth, mag, magType, nst, gap, dmin, rms, net, id_earthquake, updated, place, type, local_time
-                    ) VALUES (:time, :latitude, :longitude, :depth, :mag, :magType, :nst, :gap, :dmin, :rms, :net, :id_earthquake, :updated, :place, :type, :local_time)
+                        time, latitude, longitude, depth, Magnitude, magType, nst, gap, dmin, rms, net, id_earthquake, updated, place, type, local_time
+                    ) VALUES (:time, :latitude, :longitude, :depth, :Magnitude, :magType, :nst, :gap, :dmin, :rms, :net, :id_earthquake, :updated, :place, :type, :local_time)
                 '''), {
                     'time': row['time'],
                     'latitude': row['latitude'],
                     'longitude': row['longitude'],
                     'depth': row['depth'],
-                    'mag': row['mag'],
+                    'Magnitude': row['mag'],
                     'magType': row['magType'],
                     'nst': row['nst'],
                     'gap': row['gap'],
@@ -77,44 +55,54 @@ def upload_file():
 @app.route('/query', methods=['GET', 'POST'])
 def query_data():
     if request.method == 'POST':
-        mag = request.form.get('mag')
-        date_range = request.form.get('date_range')
+        min_mag = request.form.get('min_mag')
+        max_mag = request.form.get('max_mag')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
         lat = request.form.get('latitude')
         lon = request.form.get('longitude')
-        distance = request.form.get('distance')
+        place = request.form.get('place')
+
+        query = 'SELECT * FROM Earthquake WHERE 1=1'
+        params = {}
+
+        if min_mag and max_mag:
+            query += ' AND Magnitude BETWEEN :min_mag AND :max_mag'
+            params['min_mag'] = min_mag
+            params['max_mag'] = max_mag
+
+        if start_date and end_date:
+            if start_date <= end_date:
+                query += ' AND DateTime BETWEEN :start_date AND :end_date'
+                params['start_date'] = start_date
+                params['end_date'] = end_date
+            else:
+                return 'Error: Start date must be before end date.', 400
+
+        if lat and lon:
+            query += ' AND Latitude = :latitude AND Longitude = :longitude'
+            params['latitude'] = lat
+            params['longitude'] = lon
+
+        if place:
+            query += ' AND Place LIKE :place'
+            params['place'] = f'%{place}%'
+
+        print(query)  # Debugging: print the query
+        print(params)  # Debugging: print the parameters
 
         with engine.connect() as connection:
-            if mag:
-                result = connection.execute(text('SELECT * FROM Earthquake WHERE mag >= :mag'), {'mag': mag})
-                earthquakes = result.fetchall()
-                return render_template('results.html', earthquakes=earthquakes)
-
-            if date_range:
-                start_date, end_date = date_range.split(' - ')
-                result = connection.execute(text('SELECT * FROM Earthquake WHERE time BETWEEN :start_date AND :end_date'), {'start_date': start_date, 'end_date': end_date})
-                earthquakes = result.fetchall()
-                return render_template('results.html', earthquakes=earthquakes)
-
-            if lat and lon and distance:
-                result = connection.execute(text('''
-                    SELECT *, 
-                    (111.045 * DEGREES(ACOS(COS(RADIANS(:lat)) 
-                    * COS(RADIANS(latitude)) 
-                    * COS(RADIANS(:lon) - RADIANS(longitude)) 
-                    + SIN(RADIANS(:lat)) 
-                    * SIN(RADIANS(latitude))))) AS distance
-                    FROM Earthquake
-                    HAVING distance <= :distance
-                '''), {'lat': float(lat), 'lon': float(lon), 'distance': float(distance)})
-                earthquakes = result.fetchall()
-                return render_template('results.html', earthquakes=earthquakes)
+            result = connection.execute(text(query), params)
+            earthquakes = result.fetchall()
+            print(earthquakes)  # Debugging: Print the result set
+            return render_template('results.html', earthquakes=earthquakes)
 
     return render_template('query.html')
 
 @app.route('/count', methods=['GET'])
 def count_large_earthquakes():
     with engine.connect() as connection:
-        result = connection.execute(text('SELECT COUNT(*) AS count FROM Earthquake WHERE mag > 5.0'))
+        result = connection.execute(text('SELECT COUNT(*) AS count FROM Earthquake WHERE Magnitude > 5.0'))
         count = result.fetchone()[0]  # Accessing the first column directly
     return f'Total earthquakes with magnitude greater than 5.0: {count}'
 
@@ -123,7 +111,7 @@ def large_earthquakes_night():
     with engine.connect() as connection:
         result = connection.execute(text('''
             SELECT COUNT(*) AS count FROM Earthquake 
-            WHERE mag > 4.0 
+            WHERE Magnitude > 4.0 
             AND (CAST(time AS TIME) >= '18:00:00' OR CAST(time AS TIME) <= '06:00:00')
         '''))
         count = result.fetchone()[0]  # Accessing the first column directly
