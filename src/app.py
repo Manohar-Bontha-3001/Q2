@@ -62,6 +62,7 @@ def query_data():
         lat = request.form.get('latitude')
         lon = request.form.get('longitude')
         place = request.form.get('place')
+        night_time = request.form.get('night_time')
 
         query = 'SELECT * FROM earthquakes WHERE 1=1'
         params = {}
@@ -88,16 +89,20 @@ def query_data():
             query += ' AND Place LIKE :place'
             params['place'] = f'%{place}%'
 
-        print(query)  # Debugging: print the query
-        print(params)  # Debugging: print the parameters
+        if night_time:
+            query += " AND Magnitude > 4.0 AND (CAST(time AS TIME) >= '18:00:00' OR CAST(time AS TIME) <= '06:00:00')"
+
+        # print(query)  # Debugging: print the query
+        # print(params)  # Debugging: print the parameters
 
         with engine.connect() as connection:
             result = connection.execute(text(query), params)
             earthquakes = result.fetchall()
-            print(earthquakes)  # Debugging: Print the result set
+            # print(earthquakes)  # Debugging: Print the result set
             return render_template('results.html', earthquakes=earthquakes)
 
     return render_template('query.html')
+
 
 @app.route('/count', methods=['GET'])
 def count_large_earthquakes():
